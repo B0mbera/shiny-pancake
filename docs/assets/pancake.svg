@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-labelledby="t">
+  <title id="t">Pancake-chan, the shiny-pancake mascot</title>
+  <!-- sparkles -->
+  <g fill="#FFC94D">
+    <path d="M168 28 Q170 40 182 42 Q170 44 168 56 Q166 44 154 42 Q166 40 168 28Z"/>
+    <path d="M28 44 Q29.5 52 37 53 Q29.5 54 28 62 Q26.5 54 19 53 Q26.5 52 28 44Z"/>
+    <path d="M178 112 Q179 117 184 118 Q179 119 178 124 Q177 119 172 118 Q177 117 178 112Z"/>
+  </g>
+  <!-- plate -->
+  <ellipse cx="100" cy="174" rx="90" ry="15" fill="#D5DEE8"/>
+  <ellipse cx="100" cy="171" rx="72" ry="9" fill="#EDF2F7"/>
+  <!-- bottom pancake -->
+  <rect x="22" y="138" width="156" height="30" rx="15" fill="#C97A25"/>
+  <rect x="30" y="141" width="140" height="7" rx="3.5" fill="#E9A447" opacity=".7"/>
+  <!-- middle pancake -->
+  <rect x="28" y="113" width="144" height="30" rx="15" fill="#DB8D30"/>
+  <rect x="36" y="116" width="128" height="7" rx="3.5" fill="#F2B85A" opacity=".7"/>
+  <!-- top pancake (the face) -->
+  <rect x="24" y="74" width="152" height="44" rx="22" fill="#EBA640"/>
+  <ellipse cx="100" cy="80" rx="72" ry="11" fill="#F7C76E"/>
+  <!-- syrup with drips -->
+  <path fill="#A4521C" d="M34 80 Q100 62 166 80 Q168 86 162 88 Q158 100 154 88
+    Q148 90 144 89 Q141 97 138 89 Q118 93 100 92 Q97 100 94 92 Q78 91 62 89
+    Q59 97 56 89 Q50 89 46 88 Q42 99 38 88 Q32 86 34 80Z"/>
+  <path fill="#C66A2B" d="M60 76 Q100 66 140 76 Q100 72 60 76Z" opacity=".9"/>
+  <!-- butter -->
+  <g transform="rotate(-7 100 66)">
+    <rect x="80" y="54" width="40" height="24" rx="6" fill="#FFE9A6" stroke="#F1C75A" stroke-width="2"/>
+    <rect x="85" y="58" width="13" height="5" rx="2.5" fill="#FFFFFF" opacity=".75"/>
+  </g>
+  <!-- face -->
+  <ellipse cx="64" cy="107" rx="8" ry="4.5" fill="#FF8FA3" opacity=".6"/>
+  <ellipse cx="136" cy="107" rx="8" ry="4.5" fill="#FF8FA3" opacity=".6"/>
+  <circle cx="79" cy="101" r="6.5" fill="#3A2214"/>
+  <circle cx="121" cy="101" r="6.5" fill="#3A2214"/>
+  <circle cx="81.5" cy="98.5" r="2.3" fill="#FFFFFF"/>
+  <circle cx="123.5" cy="98.5" r="2.3" fill="#FFFFFF"/>
+  <path d="M92 105 Q100 113 108 105" fill="none" stroke="#3A2214" stroke-width="3.2" stroke-linecap="round"/>
+</svg>

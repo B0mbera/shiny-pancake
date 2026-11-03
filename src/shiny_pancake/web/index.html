@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pancake Hub</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #fff8ee; --panel: #ffffff; --ink: #2d2118; --muted: #8a7766; --line: #f0e2cf;
+    --amber: #e8973a; --syrup: #8a4a1f; --butter: #ffe29a; --pink: #ff8fa3; --ok: #3f9d63; --bad: #d4544b;
+    --chip: #fff1dc; --shadow: 0 6px 24px rgba(138, 74, 31, .08);
+    --lane-orchestrator: #e8973a; --lane-researcher: #4c8bf5; --lane-analyst: #2fa37a; --lane-critic: #c2569b;
+    --lane-worker: #a86b2d; --lane-editor: #7c5cd6; --lane-hub: #9b8b7c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1b1612; --panel: #251e18; --ink: #f6eadb; --muted: #b39f8b; --line: #3a2f26; --chip: #33281f;
+      --shadow: 0 6px 24px rgba(0, 0, 0, .35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1b1612; --panel: #251e18; --ink: #f6eadb; --muted: #b39f8b; --line: #3a2f26; --chip: #33281f;
+    --shadow: 0 6px 24px rgba(0, 0, 0, .35);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 16px; padding: 20px 24px 8px; max-width: 1240px; margin: 0 auto; }
+  header img { width: 72px; height: 72px; filter: drop-shadow(0 4px 8px rgba(138,74,31,.25)); animation: bob 3s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-4px) rotate(-2deg); } }
+  h1 { font-size: 26px; margin: 0; letter-spacing: -.02em; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  .chip { background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12px; white-space: nowrap; }
+  .chip b { font-variant-numeric: tabular-nums; }
+  main { max-width: 1240px; margin: 0 auto; padding: 8px 24px 40px; display: grid; grid-template-columns: 420px 1fr; gap: 18px; }
+  @media (max-width: 920px) { main { grid-template-columns: 1fr; padding: 8px 16px 32px; } header { padding: 16px; flex-wrap: wrap; } .chips { margin-left: 0; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tab { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 999px; padding: 6px 14px; cursor: pointer; font: inherit; }
+  .tab[aria-selected="true"] { background: var(--amber); border-color: var(--amber); color: #2d1a08; font-weight: 600; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; text-transform: uppercase; letter-spacing: .04em; }
+  textarea, input, select { width: 100%; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 12px; padding: 10px 12px; font: inherit; }
+  textarea { min-height: 120px; resize: vertical; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .row > * { flex: 1; }
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .examples button { border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 10px; padding: 4px 8px; font: inherit; font-size: 12px; cursor: pointer; text-align: left; }
+  .examples button:hover { color: var(--ink); border-color: var(--amber); }
+  .checks { display: flex; flex-wrap: wrap; gap: 6px; }
+  .checks label { display: inline-flex; gap: 6px; align-items: center; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink);
+                  margin: 0; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+  .checks input { width: auto; }
+  .go { margin-top: 14px; width: 100%; border: 0; border-radius: 14px; padding: 12px; font: inherit; font-weight: 700; cursor: pointer;
+        background: linear-gradient(180deg, #f3b25a, var(--amber)); color: #2d1a08; box-shadow: 0 4px 0 #c06f1f; }
+  .go:active { transform: translateY(2px); box-shadow: 0 2px 0 #c06f1f; }
+  .go:disabled { opacity: .6; cursor: progress; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  h2 { font-size: 15px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .status { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--chip); border: 1px solid var(--line); }
+  .status.running, .status.queued { color: var(--amber); }
+  .status.succeeded { color: var(--ok); } .status.failed { color: var(--bad); }
+  .empty { color: var(--muted); text-align: center; padding: 28px 8px; }
+  .empty img { width: 96px; opacity: .9; }
+  .lanes { display: grid; gap: 6px; margin: 6px 0 12px; }
+  .lane { display: grid; grid-template-columns: 96px 1fr 44px; gap: 8px; align-items: center; font-size: 12px; }
+  .lane .name { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lane .bar { height: 10px; border-radius: 999px; background: var(--chip); overflow: hidden; }
+  .lane .bar i { display: block; height: 100%; border-radius: 999px; transition: width .3s; }
+  .lane .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .timeline { max-height: 300px; overflow: auto; border-top: 1px solid var(--line); padding-top: 6px; font-size: 12.5px; }
+  .ev { display: grid; grid-template-columns: 52px 92px 1fr; gap: 8px; padding: 3px 0; border-bottom: 1px dotted var(--line); animation: pop .25s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translateY(-3px); } }
+  .ev .t { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ev .a { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ev .d { overflow-wrap: anywhere; }
+  .ev .k { color: var(--muted); }
+  .answer { margin-top: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; overflow-wrap: anywhere; }
+  .answer h3, .answer h4 { margin: 10px 0 4px; } .answer ul { margin: 4px 0; padding-left: 20px; } .answer p { margin: 6px 0; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 10px; }
+  .stat { background: var(--chip); border-radius: 12px; padding: 8px 10px; }
+  .stat b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  tr.job { cursor: pointer; } tr.job:hover td { background: var(--chip); }
+  .wide { grid-column: 1 / -1; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .table-wrap { overflow-x: auto; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 0 16px 28px; }
+</style>
+</head>
+<body>
+<header>
+  <img src="/favicon.svg" alt="Pancake-chan, a smiling stack of pancakes with butter and syrup">
+  <div>
+    <h1>Pancake Hub</h1>
+    <div class="sub" id="who">a stack of LLM agents, served warm</div>
+  </div>
+  <div class="chips" id="stats"></div>
+</header>
+
+<main>
+  <section class="card" aria-label="New run">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="ask">Ask the team</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="summarize">Summarize</button>
+    </div>
+
+    <form id="ask-form">
+      <label for="goal">Goal</label>
+      <textarea id="goal" required placeholder="What should the team work on?">What is 12 * (3 + 4)? Check it.</textarea>
+      <div class="examples" id="ask-examples"></div>
+      <button class="go" type="submit">Send to the team 🥞</button>
+      <div class="hint">The orchestrator plans, delegates to researcher / analyst / critic and answers. Runs as a queued job.</div>
+    </form>
+
+    <form id="sum-form" hidden>
+      <label for="sum-text">Text <span id="sum-count"></span></label>
+      <textarea id="sum-text" placeholder="Paste a long document, or load the sample playbook below."></textarea>
+      <div class="examples">
+        <button type="button" id="load-sample">Use workspace file: ai-integration-playbook.md</button>
+        <button type="button" id="load-notes">Use workspace file: notes/kickoff-meeting.md</button>
+      </div>
+      <div class="row">
+        <div><label for="strategy">Strategy</label>
+          <select id="strategy">
+            <option value="auto">auto</option><option value="map_reduce">map_reduce</option>
+            <option value="ensemble" selected>ensemble</option><option value="refine">refine</option><option value="stuff">stuff</option>
+          </select></div>
+        <div><label for="focus">Focus (optional)</label><input id="focus" placeholder="e.g. cost and security"></div>
+      </div>
+      <label>Profiles (one worker team per profile)</label>
+      <div class="checks" id="profiles"></div>
+      <button class="go" type="submit">Summarize with the workers 🧈</button>
+      <div class="hint" id="sum-hint">Chunks fan out to parallel summary workers, get tree-reduced, then an editor merges the profiles.</div>
+    </form>
+  </section>
+
+  <section class="card" aria-live="polite" aria-label="Live run">
+    <h2>Live run <span class="status" id="run-status">idle</span> <span class="mono sub" id="run-id"></span></h2>
+    <div id="run-empty" class="empty"><img src="/favicon.svg" alt=""><div>Send something and watch the agents and workers flip pancakes in real time.</div></div>
+    <div id="run-body" hidden>
+      <div class="lanes" id="lanes"></div>
+      <div class="timeline" id="timeline"></div>
+      <div class="stats" id="run-stats"></div>
+      <div class="answer" id="answer" hidden></div>
+    </div>
+  </section>
+
+  <section class="card wide" aria-label="Recent jobs">
+    <h2>Recent jobs</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>id</th><th>kind</th><th>status</th><th>worker</th><th>duration</th><th>created</th></tr></thead>
+        <tbody id="jobs"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer>shiny-pancake · <a href="/docs" style="color:inherit">API docs</a> · <a href="/api/info" style="color:inherit">hub info</a></footer>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+let apiKey = null;
+try { apiKey = localStorage.getItem("sp-api-key"); } catch (e) { /* storage unavailable */ }
+
+async function api(path, opts = {}) {
+  const headers = Object.assign({"content-type": "application/json"}, opts.headers || {});
+  if (apiKey) headers["x-api-key"] = apiKey;
+  const res = await fetch(path, Object.assign({}, opts, {headers}));
+  if (res.status === 401) {
+    apiKey = prompt("This hub requires an API key (SP_API_KEY):");
+    try { localStorage.setItem("sp-api-key", apiKey || ""); } catch (e) {}
+    if (apiKey) return api(path, opts);
+  }
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
+  return res.json();
+}
+
+// ---------- tiny, safe markdown (escape first, then format)
+function md(text) {
+  const lines = esc(text).split("\n");
+  let html = "", inList = false;
+  const inline = (s) => s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/(^|\s)_([^_]+)_(?=\s|$|[.,;:!?])/g, "$1<i>$2</i>");
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const item = line.match(/^\s*(?:[-*•]|\d+\.)\s+(.*)$/);
+    if (item) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      const box = item[1].match(/^\[( |x)\]\s*(.*)$/i);
+      html += box ? `<li style="list-style:none;margin-left:-18px">${box[1].trim() ? "☑" : "☐"} ${inline(box[2])}</li>` : `<li>${inline(item[1])}</li>`;
+      continue;
+    }
+    if (inList) { html += "</ul>"; inList = false; }
+    const h = line.match(/^(#{1,4})\s+(.*)$/);
+    if (h) html += `<h${Math.min(4, h[1].length + 2)}>${inline(h[2])}</h${Math.min(4, h[1].length + 2)}>`;
+    else if (line.trim()) html += `<p>${inline(line)}</p>`;
+  }
+  return html + (inList ? "</ul>" : "");
+}
+
+// ---------- info, examples, profiles
+const EXAMPLES = [
+  "What is 12 * (3 + 4)? Check it.",
+  "Summarize ai-integration-playbook.md and remember the key decision.",
+  "What do the kickoff meeting notes in the workspace say about deadlines?",
+  "Mennyi 1250 * 0.27 + 99? Ellenőrizd is.",
+];
+for (const ex of EXAMPLES) {
+  const b = document.createElement("button"); b.type = "button"; b.textContent = ex;
+  b.onclick = () => { $("#goal").value = ex; }; $("#ask-examples").append(b);
+}
+async function loadInfo() {
+  try {
+    const info = await api("/api/info");
+    const p = info.provider, w = info.worker_provider;
+    $("#who").textContent = `v${info.version} · main ${p.name}:${p.model} · workers ${w.name}:${w.model} ×${info.summary.workers}`;
+    const box = $("#profiles"); box.innerHTML = "";
+    for (const [name, title] of Object.entries(info.summary.profiles)) {
+      const checked = ["key_points", "action_items", "risks"].includes(name) ? "checked" : "";
+      box.insertAdjacentHTML("beforeend", `<label><input type="checkbox" value="${esc(name)}" ${checked}> ${esc(title)}</label>`);
+    }
+  } catch (e) { $("#who").textContent = "hub offline? " + e.message; }
+}
+
+// ---------- tabs
+document.querySelectorAll(".tab").forEach((tab) => tab.onclick = () => {
+  document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t === tab));
+  $("#ask-form").hidden = tab.dataset.tab !== "ask";
+  $("#sum-form").hidden = tab.dataset.tab !== "summarize";
+});
+let samplePath = null;
+$("#sum-text").oninput = () => { samplePath = null; $("#sum-count").textContent = $("#sum-text").value.length ? `(${$("#sum-text").value.length} chars)` : ""; };
+$("#load-sample").onclick = () => { samplePath = "ai-integration-playbook.md"; $("#sum-text").value = ""; $("#sum-text").placeholder = "→ will summarize workspace/ai-integration-playbook.md"; };
+$("#load-notes").onclick = () => { samplePath = "notes/kickoff-meeting.md"; $("#sum-text").value = ""; $("#sum-text").placeholder = "→ will summarize workspace/notes/kickoff-meeting.md"; };
+
+// ---------- live run rendering
+const COLORS = {orchestrator: "--lane-orchestrator", researcher: "--lane-researcher", analyst: "--lane-analyst",
+                critic: "--lane-critic", editor: "--lane-editor", hub: "--lane-hub", summarizer: "--lane-hub", pool: "--lane-hub"};
+const color = (agent) => `var(${COLORS[agent] || (agent.startsWith("worker") ? "--lane-worker" : "--lane-hub")})`;
+let source = null, t0 = null, laneCounts = {};
+
+function describe(e) {
+  const d = e.data || {};
+  if (e.kind === "llm_call") {
+    const u = d.usage || {};
+    const extra = (d.tool_calls && d.tool_calls.length) ? ` → ${d.tool_calls.join(", ")}` : (d.phase ? ` · ${d.phase}${d.chunk != null ? " chunk " + (d.chunk + 1) : ""}${d.level ? " L" + d.level : ""}` : "");
+    return `<span class="k">llm</span> ${esc(d.model)} · ${u.input_tokens || 0}→${u.output_tokens || 0} tok · ${Math.round(d.duration_ms || 0)}ms${esc(extra)}`;
+  }
+  if (e.kind === "tool_call") return `<span class="k">tool</span> <b>${esc(d.tool)}</b> ${d.ok ? "✓" : "✗"} ${esc(String(d.preview || "").slice(0, 120))}`;
+  if (e.kind === "pool_batch") return `<span class="k">pool</span> ${esc(d.phase)}: ${d.jobs} jobs on ${d.workers} workers`;
+  if (e.kind === "summary_started") return `<span class="k">plan</span> ${esc(d.strategy)} · ${d.chunks} chunks · profiles ${esc((d.profiles || []).join(", "))}`;
+  const keys = ["goal", "task", "status", "strategy", "error", "message", "kind"].filter((k) => d[k] != null);
+  return `<span class="k">${esc(e.kind)}</span> ${keys.map((k) => esc(String(d[k]).slice(0, 140))).join(" · ")}`;
+}
+
+function addEvent(e) {
+  if (t0 === null) t0 = e.ts;
+  if (e.kind === "llm_call" || e.kind === "tool_call") {
+    laneCounts[e.agent] = (laneCounts[e.agent] || 0) + 1;
+    renderLanes();
+  }
+  const row = document.createElement("div"); row.className = "ev";
+  row.innerHTML = `<span class="t">${(e.ts - t0).toFixed(2)}s</span><span class="a" style="color:${color(e.agent)}">${esc(e.agent)}</span><span class="d">${describe(e)}</span>`;
+  const tl = $("#timeline"); tl.append(row); tl.scrollTop = tl.scrollHeight;
+}
+
+function renderLanes() {
+  const max = Math.max(1, ...Object.values(laneCounts));
+  $("#lanes").innerHTML = Object.entries(laneCounts).map(([agent, n]) =>
+    `<div class="lane"><span class="name" title="${esc(agent)}">${esc(agent)}</span><span class="bar"><i style="width:${(100 * n / max).toFixed(0)}%;background:${color(agent)}"></i></span><span class="n">${n}</span></div>`).join("");
+}
+
+function renderResult(job) {
+  $("#run-status").textContent = job.status; $("#run-status").className = "status " + job.status;
+  const res = job.result || {}, tr = res.trace || {};
+  if (job.status === "failed") { $("#answer").hidden = false; $("#answer").innerHTML = `<b>Failed:</b> ${esc(job.error)}`; return; }
+  if (!res.output) return;
+  $("#answer").hidden = false; $("#answer").innerHTML = md(res.output);
+  const tokens = (tr.tokens || {}).total || 0;
+  const extra = res.kind === "summarize" ? [[res.data.chunks, "chunks"], [Object.keys(res.data.workers || {}).length, "workers used"]] : [];
+  $("#run-stats").innerHTML = [[tr.llm_calls, "llm calls"], [tr.tool_calls, "tool calls"], [tokens.toLocaleString(), "tokens"],
+    ["$" + (tr.cost_usd || 0).toFixed(4), "est. cost"], [(tr.duration_s || 0).toFixed(2) + "s", "duration"], ...extra]
+    .map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("");
+}
+
+function follow(jobId) {
+  if (source) source.close();
+  t0 = null; laneCounts = {};
+  $("#run-empty").hidden = true; $("#run-body").hidden = false;
+  $("#timeline").innerHTML = ""; $("#lanes").innerHTML = ""; $("#run-stats").innerHTML = ""; $("#answer").hidden = true;
+  $("#run-id").textContent = jobId; $("#run-status").textContent = "queued"; $("#run-status").className = "status queued";
+  source = new EventSource(`/jobs/${jobId}/stream` + (apiKey ? `?key=${encodeURIComponent(apiKey)}` : ""));
+  source.addEventListener("trace", (msg) => {
+    const e = JSON.parse(msg.data); addEvent(e);
+    if ($("#run-status").textContent === "queued") { $("#run-status").textContent = "running"; $("#run-status").className = "status running"; }
+  });
+  source.addEventListener("done", async () => { source.close(); renderResult(await api(`/jobs/${jobId}`)); refreshJobs(); setBusy(false); });
+  source.onerror = () => { source.close(); setBusy(false); };
+}
+
+function setBusy(busy) { document.querySelectorAll(".go").forEach((b) => b.disabled = busy); }
+
+$("#ask-form").onsubmit = async (ev) => {
+  ev.preventDefault(); setBusy(true);
+  try { const r = await api("/jobs", {method: "POST", body: JSON.stringify({kind: "ask", payload: {goal: $("#goal").value}})}); follow(r.job.id); }
+  catch (e) { alert(e.message); setBusy(false); }
+};
+$("#sum-form").onsubmit = async (ev) => {
+  ev.preventDefault();
+  const profiles = [...document.querySelectorAll("#profiles input:checked")].map((i) => i.value);
+  const payload = {strategy: $("#strategy").value, profiles: profiles.length ? profiles : null, focus: $("#focus").value || null};
+  if (samplePath) payload.path = samplePath; else payload.text = $("#sum-text").value;
+  if (!payload.path && !payload.text.trim()) { alert("Paste some text or pick a workspace file."); return; }
+  setBusy(true);
+  try { const r = await api("/jobs", {method: "POST", body: JSON.stringify({kind: "summarize", payload})}); follow(r.job.id); }
+  catch (e) { alert(e.message); setBusy(false); }
+};
+
+// ---------- jobs table + stats
+async function refreshJobs() {
+  try {
+    const data = await api("/jobs?limit=15");
+    $("#stats").innerHTML = Object.entries(data.stats).map(([k, v]) => `<span class="chip">${esc(k)} <b>${v}</b></span>`).join("");
+    $("#jobs").innerHTML = data.jobs.map((j) => `<tr class="job" data-id="${esc(j.id)}"><td class="mono">${esc(j.id)}</td><td>${esc(j.kind)}</td>
+      <td><span class="status ${esc(j.status)}">${esc(j.status)}</span></td><td class="mono">${esc(j.worker || "-")}</td>
+      <td>${j.duration_s != null ? j.duration_s.toFixed(2) + "s" : "-"}</td><td>${new Date(j.created_at * 1000).toLocaleTimeString()}</td></tr>`).join("")
+      || `<tr><td colspan="6" class="sub">No jobs yet.</td></tr>`;
+    document.querySelectorAll("tr.job").forEach((row) => row.onclick = () => follow(row.dataset.id));
+  } catch (e) { /* hub restarting */ }
+}
+
+loadInfo(); refreshJobs(); setInterval(refreshJobs, 4000);
+</script>
+</body>
+</html>
