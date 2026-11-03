@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "shiny-pancake": {
+      "command": "shiny-pancake",
+      "args": ["mcp-serve"],
+      "env": {
+        "SP_DATA_DIR": "/absolute/path/to/shiny-pancake/data",
+        "SP_WORKSPACE": "/absolute/path/to/shiny-pancake/workspace"
+      }
+    }
+  }
+}

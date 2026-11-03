@@ -1,0 +1,51 @@
+# The full hub: API + web UI, horizontally scaled job workers sharing one SQLite volume,
+# and an optional local LLM (Ollama) for a fully self-hosted setup.
+#
+#   docker compose up --build                       # offline demo, or Claude if ANTHROPIC_API_KEY is in .env
+#   docker compose up --build --scale worker=4      # more job workers
+#   docker compose --profile local-llm up --build   # + Ollama; then: docker compose exec ollama ollama pull llama3.2
+#                                                   #   and set SP_PROVIDER=openai SP_OPENAI_BASE_URL=http://ollama:11434/v1
+name: shiny-pancake
+
+x-pancake: &pancake
+  build: .
+  image: shiny-pancake:latest
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    SP_DATA_DIR: /data
+    SP_OFFLINE_LATENCY: ${SP_OFFLINE_LATENCY:-0.15}
+  volumes:
+    - pancake-data:/data
+  restart: unless-stopped
+
+services:
+  hub:
+    <<: *pancake
+    command: ["serve", "--host", "0.0.0.0", "--port", "8000", "--inline-workers", "0"]
+    ports:
+      - "${SP_PORT:-8000}:8000"
+
+  worker:
+    <<: *pancake
+    command: ["worker", "--concurrency", "2"]
+    depends_on:
+      hub:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    deploy:
+      replicas: 2
+
+  ollama:
+    profiles: ["local-llm"]
+    image: ollama/ollama:latest  # pin a specific version for production
+    volumes:
+      - ollama-models:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  pancake-data:
+  ollama-models:
